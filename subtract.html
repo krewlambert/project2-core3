@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pong 3D</title>
+  <title>Pong 3D – Subtract</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,12 +17,13 @@
   </header>
 
   <div class="box" id="panel">
+    <label>Mode <a href="index.html" style="color:inherit"><b>Classic</b></a></label>
     <label>Speed <span id="speedVal">1</span></label>
     <input id="speed" type="range" min=".2" max="2" step=".05" value="1">
     <label>Scale <span id="scaleVal">1×</span></label>
     <input id="scale" type="range" min=".6" max="1.6" step=".01" value="1">
     <label>Score <b id="scoreBtn">Hide</b></label>
-    <label>Mode <a href="subtract.html" style="color:inherit"><b>Subtract</b></a></label>
+    <label>Game <b id="resetBtn">Reset</b></label>
   </div>
 
   <div class="box" id="score">
@@ -32,6 +33,6 @@
 
   <div class="box" id="text"></div>
 
-  <script src="pong.js"></script>
+  <script src="subtract.js"></script>
 </body>
 </html>
