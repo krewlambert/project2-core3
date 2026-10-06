@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pong 3D</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="bg"></div>
+  <canvas id="game"></canvas>
+
+  <header>
+    <b id="controlsBtn">Game Controls</b>
+    <span id="title"></span>
+    <b id="aboutBtn">About</b>
+  </header>
+
+  <div class="box" id="panel">
+    <label>Speed <span id="speedVal">1</span></label>
+    <input id="speed" type="range" min=".2" max="2" step=".05" value="1">
+    <label>Scale <span id="scaleVal">1×</span></label>
+    <input id="scale" type="range" min=".6" max="1.6" step=".01" value="1">
+    <label>Score <b id="scoreBtn">Hide</b></label>
+  </div>
+
+  <div class="box" id="score">
+    <div><small>YOU</small><span id="score0">0</span></div>
+    <div><small>ROBOT</small><span id="score1">0</span></div>
+  </div>
+
+  <div class="box" id="text"></div>
+
+  <script src="pong.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font: 13px Arial, sans-serif;
+  text-transform: uppercase;
+}
+
+/* background image and game canvas: both fill the whole window */
+#bg, canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 100%;
+}
+
+/* top bar */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  padding: 0 36px;
+  background: #ffff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header b { font-weight: normal; cursor: pointer; }
+
+/* gold boxes (hidden until the script shows them) */
+.box {
+  position: fixed;
+  display: none;
+  background: #b39b1f;
+  padding: 12px;
+}
+
+#panel { top: 50px; left: 40px; width: 200px; }
+#panel label { display: flex; justify-content: space-between; }
+#panel input { width: 100%; }
+#panel b { cursor: pointer; }
+
+#text { top: 50px; right: 40px; width: 215px; font-size: 11px; }
+
+/* score */
+#score {
+  left: 40px;
+  bottom: 40px;
+  background: white;
+  border: 2px solid black;
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+}
+#score div { display: inline-block; width: 70px; }
+#score small { display: block; font-size: 8px; }
