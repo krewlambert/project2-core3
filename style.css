@@ -1,59 +1,98 @@
+:root { --ink: #111; --bar: linear-gradient(90deg, #7dff8a 25%, #fff75e 25% 50%, #e660ff 50% 75%, #5ccfff 75%); }
+
+/* the cursor is a circle, everywhere */
+* { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, auto !important; }
+
 body {
   margin: 0;
   overflow: hidden;
-  font: 13px Arial, sans-serif;
+  color: var(--ink);
+  font-family: "trade-gothic-next", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
   text-transform: uppercase;
 }
 
-/* background image and game canvas: both fill the whole window */
-#bg, canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 100%;
-}
+/* background image and game canvas fill the window */
+#bg, canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* top bar */
+/* header: white, condensed type, four-colour strip underneath */
 header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 30px;
-  padding: 0 36px;
-  background: #ffff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 3;
+  height: 44px; padding: 0 20px;
+  background: #fff;
+  display: flex; justify-content: space-between; align-items: center;
+  font-family: "trade-gothic-next-condensed", "trade-gothic-next", "Arial Narrow", sans-serif;
+  font-size: 19px;
 }
-header b { font-weight: normal; cursor: pointer; }
+header::after { content: ""; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: var(--bar); }
+header b { font-weight: 400; }
+header b { position: relative; z-index: 1; }
 
-/* gold boxes (hidden until the script shows them) */
-.box {
-  position: fixed;
-  display: none;
-  background: #b39b1f;
-  padding: 12px;
+/* floating pieces, hidden until the script shows them */
+.box { position: fixed; display: none; background: none; }
+
+/* game controls: a thin vertical rule, plain rows */
+#panel { top: 100px; left: 60px; width: 250px; min-height: 400px; padding: 8px 0 0 24px; border-left: 1px solid var(--ink); font-size: 13px; }
+#panel label { display: flex; align-items: center; margin-bottom: 8px; }
+#panel label > :last-child { margin-left: auto; }
+#panel a { color: inherit; }
+
+/* slider: the line is the slider, it gets longer as the value goes up */
+input[type=range] {
+  -webkit-appearance: none; appearance: none; outline: none;
+  flex: 1; height: 14px; margin: 0 8px; padding: 0;
+  background: linear-gradient(var(--ink), var(--ink)) 0 50% / var(--p, 50%) 1px no-repeat;
 }
+input[type=range]::-webkit-slider-runnable-track { background: transparent; height: 14px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 14px; background: transparent; border: 0; }
+input[type=range]::-moz-range-track { background: transparent; height: 14px; }
+input[type=range]::-moz-range-thumb { width: 10px; height: 14px; background: transparent; border: 0; }
 
-#panel { top: 50px; left: 40px; width: 200px; }
-#panel label { display: flex; justify-content: space-between; }
-#panel input { width: 100%; }
-#panel b { cursor: pointer; }
+/* score: lives in the header. a number, then one dot per point */
+#score { position: absolute; left: 0; right: 0; top: 0; height: 44px; display: flex; justify-content: center; align-items: center; gap: 40px; pointer-events: none; }
+#score .side { display: flex; align-items: center; gap: 8px; }
+#score .num { font-weight: 400; }
+#score .dots { display: flex; gap: 4px; }
+#score .dots b { width: 7px; height: 7px; border-radius: 50%; background: var(--ink); }
+.num.hit { animation: fade .5s; }
+.dots b.hit { animation: fade .5s; }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-#text { top: 50px; right: 40px; width: 215px; font-size: 11px; }
+/* wikipedia text, read out four words at a time, top right */
+#text { top: 100px; right: 50px; width: 260px; text-align: right; font-size: 28px; line-height: 1.1; text-transform: none; }
 
-/* score */
-#score {
-  left: 40px;
-  bottom: 40px;
-  background: white;
-  border: 2px solid black;
-  text-align: center;
-  font-size: 26px;
-  font-weight: bold;
+/* ------------------------------------------------------------------ LANDING */
+body.landing { text-transform: none; background: #fff; }
+.landing header { text-transform: uppercase; }
+.landing header a { color: inherit; text-decoration: none; }
+
+/* two columns of live, justified type. every line fills the column, every word reacts */
+.cover { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; gap: 24px; padding: 0 14px 10px; }
+.col { position: relative; flex: 1; display: grid; grid-template-rows: repeat(10, 1fr); font-size: min(7.2vh, 4.8vw); font-weight: 300; line-height: 1; color: #a8a8a8; }
+.line { display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
+.line span { transition: color .15s; }
+
+/* overprinted title: orange, condensed, stretched to the column the way the cover is */
+.title { position: absolute; left: 0; width: 100%; height: auto; pointer-events: none; overflow: visible; }
+.title text { fill: #f15a29; font-family: "trade-gothic-next-condensed", "trade-gothic-next", "Arial Narrow", sans-serif; font-weight: 700; text-transform: uppercase; }
+.title.top { top: 0; }
+.title.bottom { bottom: 0; }
+
+/* enter: an orange circle */
+.enter {
+  position: fixed; right: 12%; top: 38%; width: 110px; height: 110px; border-radius: 50%;
+  background: #f15a29; color: var(--ink); text-decoration: none; text-transform: uppercase; font-size: 13px;
+  display: flex; align-items: center; justify-content: center; z-index: 2; transition: transform .2s, background .2s;
 }
-#score div { display: inline-block; width: 70px; }
-#score small { display: block; font-size: 8px; }
+.enter:hover { transform: scale(1.25); background: var(--ink); color: #fff; }
+
+/* about: slides in from the right, colour bar down its side */
+#about {
+  position: fixed; top: 50px; right: 0; bottom: 0; width: min(520px, 92vw); z-index: 4; background: #fff;
+  padding: 36px 40px 40px 64px; box-sizing: border-box; overflow: auto;
+  font-size: 22px; line-height: 1.3; transform: translateX(105%); transition: transform .35s;
+}
+#about.open { transform: none; }
+#about::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 22px; background: linear-gradient(#7dff8a 25%, #fff75e 25% 50%, #e660ff 50% 75%, #5ccfff 75%); }
+#about p { margin: 0 0 1em; }
+#about b { font-weight: 400; text-transform: uppercase; font-size: 13px; letter-spacing: .06em; border-bottom: 1px solid; }

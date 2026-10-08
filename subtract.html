@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://use.typekit.net/bgi3efx.css">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Pong 3D – Subtract</title>
@@ -12,23 +13,20 @@
 
   <header>
     <b id="controlsBtn">Game Controls</b>
-    <span id="title"></span>
+    <div id="score">
+      <span class="side" id="side0">You <span class="num" id="score0">0</span><i class="dots" id="grid0"></i></span>
+      <span class="side" id="side1">Other <span class="num" id="score1">0</span><i class="dots" id="grid1"></i></span>
+    </div>
     <b id="aboutBtn">About</b>
   </header>
 
   <div class="box" id="panel">
-    <label>Mode <a href="pong.html" style="color:inherit"><b>Classic</b></a></label>
-    <label>Speed <span id="speedVal">1</span></label>
-    <input id="speed" type="range" min=".2" max="2" step=".05" value="1">
-    <label>Scale <span id="scaleVal">1×</span></label>
-    <input id="scale" type="range" min=".6" max="1.6" step=".01" value="1">
+    <label>Mode <a href="index.html">Classic</a></label>
+    <label>Speed <input id="speed" type="range" min=".2" max="2" step=".05" value="1"><span id="speedVal">1</span></label>
+    <label>Scale <input id="scale" type="range" min=".6" max="1.6" step=".01" value="1"><span id="scaleVal">1×</span></label>
     <label>Score <b id="scoreBtn">Hide</b></label>
+    <label>Rally <b id="playBtn">Play</b></label>
     <label>Game <b id="resetBtn">Reset</b></label>
-  </div>
-
-  <div class="box" id="score">
-    <div><small>YOU</small><span id="score0">0</span></div>
-    <div><small>ROBOT</small><span id="score1">0</span></div>
   </div>
 
   <div class="box" id="text"></div>

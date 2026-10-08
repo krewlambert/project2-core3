@@ -16,6 +16,7 @@ var LOOK = {
 
   ballLift:   0.08,  // ball height above the table when it leaves a paddle (and when it reaches the other)
   netClear:   0.30,  // ball height above the table as it crosses the net (must beat netHeight)
+  curve:      0.12,  // sideways bulge of a shot as a fraction of the court width, when the paddle is moving as you hit (0 = straight shots)
   bounceAt:   0.65,  // where the ball lands on the receiver's half: 0 = at the net, 1 = at the end of the table
   ballFloor:  0.03   // height of the ball's centre above the floor when it touches the table
 };
@@ -36,6 +37,21 @@ var SCENES = [
     bg:    "",
     text:  "" }
 ];
+
+// Header text: the Wikipedia "Table tennis" article, read out 4 words at a time.
+// Loaded live from Wikipedia when the page opens. Change WORDS_PER_READ to read more or fewer words
+var WORDS_PER_READ = 4;
+var WIKI = [];
+fetch('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&titles=Table_tennis&format=json&origin=*')
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    var page = d.query.pages[Object.keys(d.query.pages)[0]];
+    var words = page.extract.replace(/==+[^=]+==+/g, ' ').split(/\s+/).filter(Boolean);
+    for (var i = 0; i < words.length; i += WORDS_PER_READ) WIKI.push(words.slice(i, i + WORDS_PER_READ).join(' '));
+    Pong.showScene();
+  })
+  .catch(function() {});   // offline: the header keeps the SCENES title
+
 
 var PADDLE_IMG = new Image();
 PADDLE_IMG.src = 'paddle.png';
@@ -60,8 +76,9 @@ var Pong = {
     this.cfg = this.Defaults;
     this.width = this.cfg.width;  this.height = this.cfg.height;
     this.canvas = canvas;         this.ctx = canvas.getContext('2d');
-    this.scores = [0, 0];  this.scene = 0;  this.speed = 1;  this.zoom = 1;
+    this.scores = [0, 0];  this.scene = 0;  this.round = 0;  this.speed = 1;  this.zoom = 1;
     this.rally = 0;               // paddle hits since the last point
+    this.hits = 0;                // your hits so far: each one moves the header text on
     this.cut = [0, 0];  this.over = false;   // strips removed from the left / right; true once the court is gone
     this.keys = {};        this.trail = [];
     this.player = this.make(this.Paddle, false);
@@ -70,18 +87,20 @@ var Pong = {
     this.ball = this.make(this.Ball);
     this.ball.reset(1);
     this.showScene();
+    this.pause(true);
   },
 
   make: function(proto, arg) { var o = Object.create(proto); o.initialize(this, arg); return o; },
 
   // Back to a full court, 0-0, first scene
   reset: function() {
-    this.scores = [0, 0];  this.cut = [0, 0];  this.rally = 0;  this.over = false;
-    this.scene = 0;  this.robot.level = this.level(0);  this.robot.prediction = null;
+    this.scores = [0, 0];  this.cut = [0, 0];  this.rally = 0;  this.hits = 0;  this.over = false;
+    this.scene = 0;  this.round = 0;  this.robot.level = this.level(0);  this.robot.prediction = null;
     this.setCourt();
     [this.player, this.robot].forEach(function(p) { p.setpos(p.x, p.minY + (p.maxY - p.minY) / 2); });
     this.ball.reset(1);
     this.showScene();
+    this.pause(true);
   },
 
   // Removed strips move the side walls in. Paddles and ball keep their normal size.
@@ -96,24 +115,32 @@ var Pong = {
     this.ball.maxY = hi - this.ball.radius;
   },
 
+  // Paused: everything freezes. Every rally starts paused, press Space (or Play) to begin
+  pause: function(on) {
+    this.paused = on;
+    $('playBtn').textContent = on ? 'Play' : 'Pause';
+  },
+
   goal: function(playerNo) {
     this.scores[playerNo]++;
+    this.round++;
     this.rally = 0;
     this.cut[(this.scores[0] + this.scores[1]) % 2]++;             // remove a strip, alternating sides
     if (COURT_COLUMNS - this.cut[0] - this.cut[1] < MIN_COLUMNS) {   // too narrow to play: the court is gone
       this.over = true;
-      $('text').innerHTML = 'Completion through emptiness';  $('text').style.display = 'block';
+      $('text').textContent = 'Completion through emptiness';
       return;
     }
     this.setCourt();
     this.scene = (this.scene + 1) % SCENES.length;
     this.showScene();
     this.ball.reset(playerNo);
+    this.pause(true);                                              // wait for the player to start the next rally
     this.robot.level = this.level(this.scores[1] - this.scores[0]);
   },
 
   update: function(dt) {
-    if (this.over) return;                                          // the court no longer exists
+    if (this.over || this.paused) return;                           // court gone, or waiting to start
     // you: arrow keys / A D
     var k = this.keys, p = this.player;
     p.dir = (k.ArrowLeft || k.a) ? -1 : (k.ArrowRight || k.d) ? 1 : 0;
@@ -160,7 +187,7 @@ var Pong = {
   // Subtract mode: the whole court as faint strips, the part still standing outlined and tinted
   drawCourt: function(ctx) {
     var P = this.project.bind(this), H = this.height, W = this.width * LOOK.tableEnd, strip = H / COURT_COLUMNS, i;
-    ctx.lineWidth = 1;  ctx.strokeStyle = 'rgba(241,90,41,.3)';
+    ctx.lineWidth = 1;  ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
     for (i = 0; i <= COURT_COLUMNS; i++) { var a = P(0, i * strip, 0), b = P(W, i * strip, 0);  ctx.moveTo(a.x, a.y);  ctx.lineTo(b.x, b.y); }
     ctx.stroke();
@@ -169,7 +196,6 @@ var Pong = {
     ctx.beginPath();  ctx.moveTo(c[0].x, c[0].y);
     for (i = 1; i < 4; i++) ctx.lineTo(c[i].x, c[i].y);
     ctx.closePath();
-    ctx.fillStyle = 'rgba(241,90,41,.15)';  ctx.fill();
     ctx.strokeStyle = ORANGE;  ctx.lineWidth = 2;  ctx.stroke();
   },
 
@@ -180,14 +206,16 @@ var Pong = {
     this.drawCourt(ctx);
     ctx.strokeStyle = 'white';
 
-    function drawNet() {                     // straight grid across the full screen
+    function drawNet() {                     // grid spans the table: it narrows as the court does
+      var strip = self.height / COURT_COLUMNS;
+      var L = self.project(netX, self.cut[0] * strip, 0), R = self.project(netX, self.height - self.cut[1] * strip, 0);
       var top = mid.y - LOOK.netHeight * h * mid.s, step = 60 * mid.k;
-      ctx.lineWidth = 1.5;  ctx.strokeStyle = 'white';  ctx.beginPath();
+      ctx.lineWidth = 1.5;  ctx.strokeStyle = 'black';  ctx.beginPath();
       for (var i = 0; i <= 3; i++) {
         var y = top + (mid.y - top) * i / 3;
-        ctx.moveTo(0, y);  ctx.lineTo(w, y);
+        ctx.moveTo(L.x, y);  ctx.lineTo(R.x, y);
       }
-      for (var x = (w * LOOK.vanishX) % step; x < w; x += step) { ctx.moveTo(x, top);  ctx.lineTo(x, mid.y); }
+      for (var x = L.x; x <= R.x + 1; x += step) { ctx.moveTo(x, top);  ctx.lineTo(x, mid.y); }
       ctx.stroke();
     }
 
@@ -215,9 +243,9 @@ var Pong = {
   showScene: function() {
     var s = SCENES[this.scene];
     $('bg').style.background = s.img ? 'url("' + s.img + '") center / cover, ' + s.bg : s.bg;
-    $('title').textContent = s.title;
-    $('text').innerHTML = s.text;
-    $('text').style.display = s.text ? 'block' : 'none';
+    var t = this.over ? 'Completion through emptiness' : (WIKI.length ? WIKI[this.hits % WIKI.length] : s.title);
+    $('text').textContent = t;
+    $('text').style.display = t ? 'block' : 'none';
   },
 
   //=============================================================================
@@ -262,8 +290,7 @@ var Pong = {
 
       var pt = Pong.Helper.ballIntercept(ball, { left: this.left, right: this.right, top: -10000, bottom: 10000 }, ball.dx * 10, ball.dy * 10);
       if (pt) {
-        var t = this.minY + ball.radius, b = this.maxY + this.height - ball.radius;
-        while (pt.y < t || pt.y > b) pt.y = pt.y < t ? t + (t - pt.y) : t + (b - t) - (pt.y - b);   // bounce off the walls
+        pt.y = ball.endY;                                          // where the curve will arrive
         var closeness = (this.left - ball.x) / this.pong.width;
         var error = this.level.aiError * closeness;                // robot is less accurate when far from the ball
         pt.since = 0;  pt.dx = ball.dx;  pt.dy = ball.dy;
@@ -331,6 +358,24 @@ var Pong = {
       this.g  = 2 * (z0 + this.vz * T1) / (T1 * T1);
       this.vz2 = (z0 + 0.5 * this.g * T2 * T2) / T2;                      // speed leaving the table, to reach hit height
       this.bounced = false;
+
+      // Sideways: no wall to bounce off. The ball follows a smooth curve (sidespin) and arrives inside the court.
+      // endY = where it reaches the receiver, ay = sideways acceleration from spin, dy = starting sideways speed
+      var lo = this.minY, hi = this.maxY, span = Math.max(hi - lo, 1);
+      var face = right ? this.pong.robot.left : this.pong.player.right;
+      var T = Math.max(this.flightTime(Math.abs(face - this.x)), 0.05);
+      var yt = this.y + this.dy * T;                                              // where the straight line would end
+      var m = (((yt - lo) % (2 * span)) + 2 * span) % (2 * span);
+      yt = lo + (m < span ? m : 2 * span - m);                                    // folded back into the court
+      var hitter = right ? this.pong.player : this.pong.robot;
+      var bow = (hitter.dir ? hitter.dir * LOOK.curve : (Math.random() * 2 - 1) * LOOK.curve * 0.4) * span;   // sideways bulge of the arc
+      var ay = 8 * bow / (T * T), vy = (yt - this.y - 4 * bow) / T, ok = true;
+      for (var i = 1; i < 10; i++) {                                              // the curve must stay inside the court
+        var t = T * i / 10, yy = this.y + vy * t + 0.5 * ay * t * t;
+        if (yy < lo || yy > hi) ok = false;
+      }
+      if (!ok) { ay = 0;  vy = (yt - this.y) / T; }
+      this.ay = ay;  this.dy = vy;  this.endY = yt;
     },
 
     setpos: function(x, y) {
@@ -340,14 +385,14 @@ var Pong = {
 
     update: function(dt, player, robot) {
       var pos = Pong.Helper.accelerate(this.x, this.y, this.dx, this.dy, this.accel, dt);
-
-      if (pos.dy > 0 && pos.y > this.maxY) { pos.y = this.maxY;  pos.dy = -pos.dy; }   // side walls
-      else if (pos.dy < 0 && pos.y < this.minY) { pos.y = this.minY;  pos.dy = -pos.dy; }
+      pos.y  = this.y + this.dy * dt + 0.5 * this.ay * dt * dt;                     // sideways: spin curve, no walls
+      pos.ny = pos.y - this.y;
+      pos.dy = this.dy + this.ay * dt;
 
       var hit = false, paddle = pos.dx < 0 ? player : robot;
       var pt = Pong.Helper.ballIntercept(this, paddle, pos.nx, pos.ny);
       if (pt) {
-        if (pt.d == 'left' || pt.d == 'right') { pos.x = pt.x;  pos.dx = -pos.dx;  this.pong.rally++;  hit = true; }   // a hit
+        if (pt.d == 'left' || pt.d == 'right') { pos.x = pt.x;  pos.dx = -pos.dx;  this.pong.rally++;  hit = true;  if (paddle === player) { Pong.hits++;  Pong.showScene(); } }   // a hit
         else                                   { pos.y = pt.y;  pos.dy = -pos.dy; }
         // add/remove spin based on paddle direction
         if (paddle.dir < 0)      pos.dy *= (pos.dy < 0 ? 0.5 : 1.5);
@@ -420,25 +465,50 @@ addEventListener('resize', resize);  resize();
 
 Pong.initialize(canvas);
 
-addEventListener('keydown', function(e) { Pong.keys[e.key] = true;  if (e.key == 'r') Pong.reset(); });
+addEventListener('keydown', function(e) { Pong.keys[e.key] = true;  if (e.key == 'r') Pong.reset();  if (e.key == ' ' && !Pong.over) { e.preventDefault(); Pong.pause(!Pong.paused); } });
 addEventListener('keyup',   function(e) { Pong.keys[e.key] = false; });
 
 // controls panel
 function toggle(el, show) { el.style.display = (el.style.display == 'none' || !el.style.display) ? show : 'none'; }
 $('controlsBtn').onclick = function() { toggle($('panel'), 'block'); };
-$('aboutBtn').onclick    = function() { if (SCENES[Pong.scene].text) toggle($('text'), 'block'); };
+$('aboutBtn').onclick    = function() { toggle($('text'), 'block'); };
 $('scoreBtn').onclick    = function() { toggle($('score'), 'flex');  $('scoreBtn').textContent = $('score').style.display == 'none' ? 'Show' : 'Hide'; };
+$('playBtn').onclick     = function() { if (!Pong.over) Pong.pause(!Pong.paused); };
 $('resetBtn').onclick    = function() { Pong.reset(); };
 $('speed').oninput = function() { Pong.speed = +this.value;  $('speedVal').textContent = this.value; };
 $('scale').oninput = function() { Pong.zoom  = +this.value;  $('scaleVal').textContent = this.value + '×'; };
 $('score').style.display = 'flex';
+
+// slider lines: the black line grows as the value goes up
+['speed', 'scale'].forEach(function(id) {
+  var el = $(id);
+  function fill() { el.style.setProperty('--p', (el.value - el.min) / (el.max - el.min) * 100 + '%'); }
+  el.addEventListener('input', fill);  fill();
+});
+
+// score: a number plus a grid of squares, one per point. the two grids overprint each other
+var shown = [-1, -1];
+function drawScore() {
+  for (var i = 0; i < 2; i++) {
+    var n = Pong.scores[i];
+    if (n == shown[i]) continue;
+    var up = n > shown[i] && shown[i] >= 0;
+    shown[i] = n;
+    var num = $('score' + i), grid = $('grid' + i), side = $('side' + i);
+    num.textContent = n;
+    grid.innerHTML = '';
+    for (var k = 0; k < n; k++) grid.appendChild(document.createElement('b'));
+    if (up) {                                   // restart the animations on the new point
+      [num, grid.lastChild].forEach(function(el) { el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); });
+    }
+  }
+}
 
 (function loop() {
   var now = Date.now(), dt = Math.min((now - lastTime) / 1000, 0.05) * Pong.speed;
   lastTime = now;
   Pong.update(dt);
   Pong.draw(Pong.ctx, canvas.width, canvas.height);
-  $('score0').textContent = Pong.scores[0];
-  $('score1').textContent = Pong.scores[1];
+  drawScore();
   requestAnimationFrame(loop);
 })();

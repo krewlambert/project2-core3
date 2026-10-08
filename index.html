@@ -1,121 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="stylesheet" href="https://use.typekit.net/bgi3efx.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Permitted Obstructions</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      background: white;
-    }
-
-    body {
-      overflow-x: hidden;
-    }
-
-    .landing {
-      position: relative;
-      width: 100%;
-    }
-
-    /* SCROLLING IMAGE */
-    .cover {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    /* Second image underneath */
-    .cover-2 {
-      margin-top: 0;
-    }
-
-    /* Title */
-    .label {
-      position: fixed;
-      top: 18px;
-      left: 18px;
-      z-index: 10;
-
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 20px;
-      font-weight: bold;
-      letter-spacing: -0.04em;
-
-      color: #f4512a;
-      mix-blend-mode: multiply;
-    }
-
-    /* ENTER BUTTON */
-    .enter {
-      position: fixed;
-      left: 50%;
-      bottom: 40px;
-      transform: translateX(-50%);
-      z-index: 10;
-
-      width: 90px;
-      height: 90px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      border-radius: 50%;
-      background: #f4512a;
-      color: white;
-
-      text-decoration: none;
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 0.04em;
-
-      transition: transform 0.2s ease,
-                  background 0.2s ease;
-    }
-
-    .enter:hover {
-      background: #f4512a;
-      transform: translateX(-50%) scale(1.08);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
+<body class="landing">
+  <header>
+    <a href="subtract.html">Play</a>
+    <a href="landing.html">Permitted Obstructions</a>
+    <b id="aboutBtn">About</b>
+  </header>
 
-<body>
-
-  <main class="landing">
-
-    
-
-    <!-- First cover -->
-    <img
-      class="cover"
-      src="cover-01.png"
-      alt=""
-    >
-
-    <!-- Second cover continues below it -->
-    <img
-      class="cover cover-2"
-      src="cover-02.png"
-      alt=""
-    >
-
-    <a class="enter" href="subtract.html">
-      ENTER
-    </a>
-
+  <main class="cover">
+    <div class="col">
+      <div class="line"><span>Table</span><span>tennis</span><span>(also</span></div>
+      <div class="line"><span>known</span><span>as</span><span>ping-pong)</span></div>
+      <div class="line"><span>is</span><span>a</span><span>racket</span><span>sport</span></div>
+      <div class="line"><span>derived</span><span>from</span><span>tennis</span></div>
+      <div class="line"><span>but</span><span>distinguished</span><span>by</span></div>
+      <div class="line"><span>its</span><span>playing</span><span>surface</span></div>
+      <div class="line"><span>being</span><span>atop</span><span>a</span></div>
+      <div class="line"><span>stationary</span><span>table,</span></div>
+      <div class="line"><span>rather</span><span>than</span><span>the</span><span>court</span></div>
+      <div class="line"><span>on</span><span>which</span><span>players</span></div>
+      <svg class="title top" viewBox="0 0 680 100"><text x="0" y="96" font-size="136" textLength="680" lengthAdjust="spacing">Permitted</text></svg>
+      <svg class="title bottom" viewBox="0 0 680 100"><text x="0" y="96" font-size="136" textLength="680" lengthAdjust="spacingAndGlyphs">Obstructions</text></svg>
+    </div>
+    <div class="col">
+      <div class="line"><span>Either</span><span>individually</span><span>or</span></div>
+      <div class="line"><span>in</span><span>teams</span><span>of</span><span>two,</span></div>
+      <div class="line"><span>players</span><span>take</span></div>
+      <div class="line"><span>alternating</span><span>turns</span></div>
+      <div class="line"><span>returning</span><span>a</span><span>light,</span></div>
+      <div class="line"><span>hollow</span><span>ball</span><span>over</span><span>the</span></div>
+      <div class="line"><span>table's</span><span>net</span><span>onto</span><span>the</span></div>
+      <div class="line"><span>opposing</span><span>half</span><span>of</span><span>the</span></div>
+      <div class="line"><span>court</span><span>using</span><span>small</span></div>
+      <div class="line"><span>rackets</span><span>until</span><span>they</span><span>fail</span></div>
+    </div>
   </main>
 
+  <a class="enter" href="subtract.html">Enter</a>
+
+  <aside id="about">
+    <p><b id="aboutClose">Close</b></p>
+    <p>Permitted Obstructions is a photographic and research-based book exploring ping-pong as a form of social space in New York City.</p>
+    <p>The project will attempt to establish the space that exists between organized sport and informal play: established within designated tables and courts, to improvised games that interrupt predetermined structures and established everyday movement.</p>
+    <p>By shifting where and how ping-pong happens, the project asks how play can interrupt, redefine, and create public space through user interaction.</p>
+  </aside>
+
+  <script>
+    // words take a colour from the strip when you touch them
+    var COLORS = ['#7dff8a', '#fff75e', '#e660ff', '#5ccfff'], n = 0;
+    document.querySelectorAll('.line span').forEach(function(w) {
+      w.addEventListener('mouseenter', function() { w.style.color = COLORS[n++ % 4]; });
+      w.addEventListener('mouseleave', function() { w.style.color = ''; });
+    });
+    // the cursor circle takes a strip colour while it is over Enter
+    var enter = document.querySelector('.enter');
+    enter.addEventListener('mouseenter', function() {
+      var c = COLORS[n++ % 4].replace('#', '%23');
+      enter.style.setProperty('cursor', "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='9' fill='" + c + "' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E\") 10 10, auto", 'important');
+    });
+    var about = document.getElementById('about');
+    document.getElementById('aboutBtn').onclick = function() { about.classList.toggle('open'); };
+    document.getElementById('aboutClose').onclick = function() { about.classList.remove('open'); };
+  </script>
 </body>
 </html>
