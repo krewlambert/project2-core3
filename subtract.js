@@ -1,9 +1,6 @@
-// SUBTRACT MODE: same physics as pong.js. Each point removes a strip of the court.
-//=============================================================================
-// SETTINGS – the things you're most likely to tweak
-//=============================================================================
 
-// Look of the 3D view (all heights are fractions of the screen height)
+
+
 var LOOK = {
   vanishX:    0.50,  // where the court narrows to, horizontally
   horizon:    0.40,  // ... and vertically
@@ -21,12 +18,12 @@ var LOOK = {
   ballFloor:  0.03   // height of the ball's centre above the floor when it touches the table
 };
 
-var ORANGE       = '#f15a29';       // accent colour (baseline, court)
-var MAX_DOTS     = 10;              // rally counter: one dot per hit
-var COURT_COLUMNS = 20;             // the court is this many strips wide; every point removes one
-var MIN_COLUMNS   = 6;              // narrowest playable court. One point past this, the court disappears
+var ORANGE       = '#f15a29';      
+var MAX_DOTS     = 10;              
+var COURT_COLUMNS = 20;             
+var MIN_COLUMNS   = 6;              
 
-// Background + text for each scene (switches every point)
+
 var SCENES = [
   { title: "start with saying this",
     img:   "",
@@ -38,8 +35,7 @@ var SCENES = [
     text:  "" }
 ];
 
-// Header text: the Wikipedia "Table tennis" article, read out 4 words at a time.
-// Loaded live from Wikipedia when the page opens. Change WORDS_PER_READ to read more or fewer words
+
 var WORDS_PER_READ = 4;
 var WIKI = [];
 fetch('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&titles=Table_tennis&format=json&origin=*')
@@ -92,7 +88,7 @@ var Pong = {
 
   make: function(proto, arg) { var o = Object.create(proto); o.initialize(this, arg); return o; },
 
-  // Back to a full court, 0-0, first scene
+
   reset: function() {
     this.scores = [0, 0];  this.cut = [0, 0];  this.rally = 0;  this.hits = 0;  this.over = false;
     this.scene = 0;  this.round = 0;  this.robot.level = this.level(0);  this.robot.prediction = null;

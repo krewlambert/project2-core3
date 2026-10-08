@@ -1,6 +1,6 @@
 :root { --ink: #111; --bar: linear-gradient(90deg, #7dff8a 25%, #fff75e 25% 50%, #e660ff 50% 75%, #5ccfff 75%); }
 
-/* the cursor is a circle, everywhere */
+
 * { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 10 10, auto !important; }
 
 body {
@@ -12,10 +12,9 @@ body {
   text-transform: uppercase;
 }
 
-/* background image and game canvas fill the window */
+
 #bg, canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
 
-/* header: white, condensed type, four-colour strip underneath */
 header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 3;
   height: 44px; padding: 0 20px;
@@ -37,7 +36,6 @@ header b { position: relative; z-index: 1; }
 #panel label > :last-child { margin-left: auto; }
 #panel a { color: inherit; }
 
-/* slider: the line is the slider, it gets longer as the value goes up */
 input[type=range] {
   -webkit-appearance: none; appearance: none; outline: none;
   flex: 1; height: 14px; margin: 0 8px; padding: 0;
@@ -66,19 +64,18 @@ body.landing { text-transform: none; background: #fff; }
 .landing header { text-transform: uppercase; }
 .landing header a { color: inherit; text-decoration: none; }
 
-/* two columns of live, justified type. every line fills the column, every word reacts */
 .cover { position: fixed; top: 60px; left: 0; right: 0; bottom: 0; display: flex; gap: 24px; padding: 0 14px 10px; }
 .col { position: relative; flex: 1; display: grid; grid-template-rows: repeat(10, 1fr); font-size: min(7.2vh, 4.8vw); font-weight: 300; line-height: 1; color: #a8a8a8; }
 .line { display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
 .line span { transition: color .15s; }
 
-/* overprinted title: orange, condensed, stretched to the column the way the cover is */
+
 .title { position: absolute; left: 0; width: 100%; height: auto; pointer-events: none; overflow: visible; }
 .title text { fill: #f15a29; font-family: "trade-gothic-next-condensed", "trade-gothic-next", "Arial Narrow", sans-serif; font-weight: 700; text-transform: uppercase; }
 .title.top { top: 0; }
 .title.bottom { bottom: 0; }
 
-/* enter: an orange circle */
+
 .enter {
   position: fixed; right: 12%; top: 38%; width: 110px; height: 110px; border-radius: 50%;
   background: #f15a29; color: var(--ink); text-decoration: none; text-transform: uppercase; font-size: 13px;
@@ -86,7 +83,7 @@ body.landing { text-transform: none; background: #fff; }
 }
 .enter:hover { transform: scale(1.25); background: var(--ink); color: #fff; }
 
-/* about: slides in from the right, colour bar down its side */
+
 #about {
   position: fixed; top: 50px; right: 0; bottom: 0; width: min(520px, 92vw); z-index: 4; background: #fff;
   padding: 36px 40px 40px 64px; box-sizing: border-box; overflow: auto;
