@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="https://use.typekit.net/bgi3efx.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>About - Permitted Obstructions</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="landing">
+  <header>
+    <a href="subtract.html">Play</a>
+    <a href="index.html">Permitted Obstructions</a>
+    <b>About</b>
+  </header>
+
+  <main class="about-page">
+    <p class="label">Foundations</p>
+    <p><b>Permitted Obstructions</b> is a photographic and research-based book exploring <b>ping-pong</b> as a form of social space in <b>New York City.</b></p>
+    <p>The project will attempt to establish the space that exists between <b>organized</b> sport and <b>informal</b> play. Established within designated tables and courts, to improvised games that interrupt predetermined structures and established everyday movement. By shifting where and how ping-pong happens, the project asks how play can <b>interrupt, redefine,</b> and <b>create public space</b> through <b>user interaction.</b></p>
+  </main>
+
+  <script>
+  
+    var COLORS = ['#f15a29', '#f0b400', '#1fa35b', '#2a43d0'], n = 0;
+    document.querySelectorAll('.about-page p').forEach(function(p) {
+      p.innerHTML = p.innerHTML.replace(/(<[^>]+>)|([^<\s]+)/g, function(m, tag, word) { return tag || '<span>' + word + '</span>'; });
+    });
+    document.querySelectorAll('.about-page span').forEach(function(w) {
+      w.addEventListener('mouseenter', function() { w.style.color = COLORS[n++ % 4]; });
+      w.addEventListener('mouseleave', function() { w.style.color = ''; });
+    });
+
+    var page = document.querySelector('.about-page');
+    function fit() {
+      var lo = 10, hi = 200;
+      while (hi - lo > 0.5) {
+        var mid = (lo + hi) / 2;
+        page.style.fontSize = mid + 'px';
+        if (page.scrollHeight > innerHeight) hi = mid; else lo = mid;
+      }
+      page.style.fontSize = lo + 'px';
+    }
+    fit();  addEventListener('resize', fit);
+  </script>
+</body>
+</html>

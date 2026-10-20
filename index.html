@@ -8,8 +8,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="landing">
-  <header>
-  </header>
+  <header class="strip"></header>
 
   <main class="cover">
     <div class="col">
@@ -42,29 +41,20 @@
 
   <a class="enter" href="subtract.html">Enter</a>
 
-  <aside id="about">
-    <p><b id="aboutClose">Close</b></p>
-    <p>Permitted Obstructions is a photographic and research-based book exploring ping-pong as a form of social space in New York City.</p>
-    <p>The project will attempt to establish the space that exists between organized sport and informal play: established within designated tables and courts, to improvised games that interrupt predetermined structures and established everyday movement.</p>
-    <p>By shifting where and how ping-pong happens, the project asks how play can interrupt, redefine, and create public space through user interaction.</p>
-  </aside>
 
   <script>
-    // words take a colour from the strip when you touch them
-    var COLORS = ['#7dff8a', '#fff75e', '#e660ff', '#5ccfff'], n = 0;
+    
+    var COLORS = ['#f15a29', '#f0b400', '#1fa35b', '#2a43d0'], n = 0;
     document.querySelectorAll('.line span').forEach(function(w) {
       w.addEventListener('mouseenter', function() { w.style.color = COLORS[n++ % 4]; });
       w.addEventListener('mouseleave', function() { w.style.color = ''; });
     });
-    // the cursor circle takes a strip colour while it is over Enter
+
     var enter = document.querySelector('.enter');
     enter.addEventListener('mouseenter', function() {
       var c = COLORS[n++ % 4].replace('#', '%23');
       enter.style.setProperty('cursor', "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='9' fill='" + c + "' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E\") 10 10, auto", 'important');
     });
-    var about = document.getElementById('about');
-    document.getElementById('aboutBtn').onclick = function() { about.classList.toggle('open'); };
-    document.getElementById('aboutClose').onclick = function() { about.classList.remove('open'); };
   </script>
 </body>
 </html>

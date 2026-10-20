@@ -2,27 +2,26 @@
 
 
 var LOOK = {
-  vanishX:    0.50,  // where the court narrows to, horizontally
-  horizon:    0.40,  // ... and vertically
-  ground:     0.90,  // screen position of the near edge of the court
-  court:      1.00,  // court width at the near edge, as a fraction of screen width
-  tableEnd:   0.78,  // where the table ends, as a fraction of the depth. The far paddle stands behind it
-  depth:      3,     // perspective strength: higher = far end is smaller
-  netHeight:  0.22,  // height of the net
-  paddleLift: 0.06,  // paddle height above the floor
+  vanishX:    0.50,  
+  horizon:    0.40,  
+  ground:     0.90,  
+  court:      1.00,  
+  tableEnd:   0.78,  
+  depth:      3,     
+  netHeight:  0.22,  
+  paddleLift: 0.06,  
 
-  ballLift:   0.08,  // ball height above the table when it leaves a paddle (and when it reaches the other)
-  netClear:   0.30,  // ball height above the table as it crosses the net (must beat netHeight)
-  curve:      0.12,  // sideways bulge of a shot as a fraction of the court width, when the paddle is moving as you hit (0 = straight shots)
-  bounceAt:   0.65,  // where the ball lands on the receiver's half: 0 = at the net, 1 = at the end of the table
-  ballFloor:  0.03   // height of the ball's centre above the floor when it touches the table
+  ballLift:   0.08,  
+  netClear:   0.30,  
+  curve:      0.12,  
+  bounceAt:   0.65,  
+  ballFloor:  0.03   
 };
 
-var ORANGE       = '#f15a29';      
-var MAX_DOTS     = 10;              
+var ORANGE       = '#f15a29';       
+var MAX_DOTS     = 10;             
 var COURT_COLUMNS = 20;             
-var MIN_COLUMNS   = 6;              
-
+var MIN_COLUMNS   = 6;             
 
 var SCENES = [
   { title: "start with saying this",
@@ -38,6 +37,7 @@ var SCENES = [
 
 var WORDS_PER_READ = 4;
 var WIKI = [];
+var BAR_COLORS = ['#f15a29', '#f0b400', '#1fa35b', '#2a43d0'];   // text colours: orange, yellow, green, blue
 fetch('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&redirects=1&titles=Table_tennis&format=json&origin=*')
   .then(function(r) { return r.json(); })
   .then(function(d) {
@@ -46,7 +46,7 @@ fetch('https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext
     for (var i = 0; i < words.length; i += WORDS_PER_READ) WIKI.push(words.slice(i, i + WORDS_PER_READ).join(' '));
     Pong.showScene();
   })
-  .catch(function() {});   // offline: the header keeps the SCENES title
+  .catch(function() {});  
 
 
 var PADDLE_IMG = new Image();
@@ -55,10 +55,6 @@ PADDLE_IMG.src = 'paddle.png';
 var BALL_IMG = new Image();
 BALL_IMG.src = 'ball.png';
 
-//=============================================================================
-// GAME LOGIC – from jakesgordon/javascript-pong.
-// x = depth (0 = you, width = robot), y = left/right.
-//=============================================================================
 
 var Pong = {
 
@@ -72,10 +68,10 @@ var Pong = {
     this.cfg = this.Defaults;
     this.width = this.cfg.width;  this.height = this.cfg.height;
     this.canvas = canvas;         this.ctx = canvas.getContext('2d');
-    this.scores = [0, 0];  this.scene = 0;  this.round = 0;  this.speed = 1;  this.zoom = 1;
-    this.rally = 0;               // paddle hits since the last point
-    this.hits = 0;                // your hits so far: each one moves the header text on
-    this.cut = [0, 0];  this.over = false;   // strips removed from the left / right; true once the court is gone
+    this.scores = [0, 0];  this.scene = 0;  this.round = 0;  this.speed = 1.3;  this.zoom = 1;
+    this.rally = 0;              
+    this.hits = 0;                
+    this.cut = [0, 0];  this.over = false;  
     this.keys = {};        this.trail = [];
     this.player = this.make(this.Paddle, false);
     this.robot  = this.make(this.Paddle, true);
@@ -88,9 +84,10 @@ var Pong = {
 
   make: function(proto, arg) { var o = Object.create(proto); o.initialize(this, arg); return o; },
 
-
+ 
   reset: function() {
     this.scores = [0, 0];  this.cut = [0, 0];  this.rally = 0;  this.hits = 0;  this.over = false;
+    $('log').innerHTML = '';
     this.scene = 0;  this.round = 0;  this.robot.level = this.level(0);  this.robot.prediction = null;
     this.setCourt();
     [this.player, this.robot].forEach(function(p) { p.setpos(p.x, p.minY + (p.maxY - p.minY) / 2); });
@@ -99,7 +96,7 @@ var Pong = {
     this.pause(true);
   },
 
-  // Removed strips move the side walls in. Paddles and ball keep their normal size.
+
   setCourt: function() {
     var strip = this.height / COURT_COLUMNS, wall = this.cfg.wallWidth;
     var lo = wall + this.cut[0] * strip, hi = this.height - wall - this.cut[1] * strip;
@@ -111,7 +108,7 @@ var Pong = {
     this.ball.maxY = hi - this.ball.radius;
   },
 
-  // Paused: everything freezes. Every rally starts paused, press Space (or Play) to begin
+
   pause: function(on) {
     this.paused = on;
     $('playBtn').textContent = on ? 'Play' : 'Pause';
@@ -122,21 +119,21 @@ var Pong = {
     this.round++;
     this.rally = 0;
     this.cut[(this.scores[0] + this.scores[1]) % 2]++;             // remove a strip, alternating sides
-    if (COURT_COLUMNS - this.cut[0] - this.cut[1] < MIN_COLUMNS) {   // too narrow to play: the court is gone
+    if (COURT_COLUMNS - this.cut[0] - this.cut[1] < MIN_COLUMNS) {   
       this.over = true;
-      $('text').textContent = 'Completion through emptiness';
+      $('chunk').textContent = 'Completion through emptiness';  $('count').textContent = '';
       return;
     }
     this.setCourt();
     this.scene = (this.scene + 1) % SCENES.length;
     this.showScene();
     this.ball.reset(playerNo);
-    this.pause(true);                                              // wait for the player to start the next rally
+    this.pause(true);                                            
     this.robot.level = this.level(this.scores[1] - this.scores[0]);
   },
 
   update: function(dt) {
-    if (this.over || this.paused) return;                           // court gone, or waiting to start
+    if (this.over || this.paused) return;                          
     // you: arrow keys / A D
     var k = this.keys, p = this.player;
     p.dir = (k.ArrowLeft || k.a) ? -1 : (k.ArrowRight || k.d) ? 1 : 0;
@@ -152,7 +149,7 @@ var Pong = {
   // 3D VIEW
   //---------------------------------------------------------------------------
 
-  // world (x depth, y sideways, lift height) -> screen. k = pixels per world unit at that depth
+  
   project: function(x, y, lift) {
     var w = this.canvas.width, h = this.canvas.height;
     var s = this.zoom / (1 + LOOK.depth * x / this.width);
@@ -165,8 +162,8 @@ var Pong = {
     };
   },
 
-  // Rally counter: orange baseline with a centre tick, one dot per hit (outer row = you, inner row = robot).
-  // Drawn vertically along the right edge of the page, reading bottom to top.
+ 
+
   drawRally: function(ctx, w, h) {
     var k = 0.7, len = h * 0.45 / k;                              // k = scale, len = on-screen length / k
     ctx.save();
@@ -202,7 +199,7 @@ var Pong = {
     this.drawCourt(ctx);
     ctx.strokeStyle = 'white';
 
-    function drawNet() {                     // grid spans the table: it narrows as the court does
+    function drawNet() {                   
       var strip = self.height / COURT_COLUMNS;
       var L = self.project(netX, self.cut[0] * strip, 0), R = self.project(netX, self.height - self.cut[1] * strip, 0);
       var top = mid.y - LOOK.netHeight * h * mid.s, step = 60 * mid.k;
@@ -211,36 +208,49 @@ var Pong = {
         var y = top + (mid.y - top) * i / 3;
         ctx.moveTo(L.x, y);  ctx.lineTo(R.x, y);
       }
-      for (var x = L.x; x <= R.x + 1; x += step) { ctx.moveTo(x, top);  ctx.lineTo(x, mid.y); }
+      for (var x = L.x; x < R.x - 1; x += step) { ctx.moveTo(x, top);  ctx.lineTo(x, mid.y); }
+      ctx.moveTo(R.x, top);  ctx.lineTo(R.x, mid.y);                        
       ctx.stroke();
     }
 
     function drawBall() {
-      var shadow = self.project(ball.x, ball.y, 0);          // shadow on the floor shows where it is
+      var shadow = self.project(ball.x, ball.y, 0);         
       ctx.fillStyle = 'rgba(0,0,0,.2)';
       ctx.beginPath();  ctx.ellipse(shadow.x, shadow.y, ball.radius * shadow.k, ball.radius * shadow.k * .35, 0, 0, 7);  ctx.fill();
 
       self.trail.concat([ball]).forEach(function(b, i, all) {
         var c = self.project(b.x, b.y, b.z + LOOK.ballFloor), last = (i == all.length - 1), age = (i + 1) / all.length;
-        var r = ball.radius * c.k * (last ? 1 : 0.5 + 0.4 * age);        // older copies are smaller...
-        ctx.globalAlpha = last ? 1 : 0.1 * age;                          // ...and fainter
+        var r = ball.radius * c.k * (last ? 1 : 0.5 + 0.4 * age);        
+        ctx.globalAlpha = last ? 1 : 0.1 * age;                         
         ctx.drawImage(BALL_IMG, c.x - r, c.y - r, r * 2, r * 2);
       });
       ctx.globalAlpha = 1;
     }
 
     this.robot.draw(ctx);
-    if (ball.x > netX) { drawBall();  drawNet(); }   // ball behind the net
-    else                         { drawNet();   drawBall(); }  // ball in front of it
+    if (ball.x > netX) { drawBall();  drawNet(); }  
+    else                         { drawNet();   drawBall(); }  
     this.player.draw(ctx);
     this.drawRally(ctx, w, h);
+  },
+
+  
+  addLog: function() {
+    if (!WIKI.length) return;
+    var log = $('log'), d = document.createElement('div');
+    d.textContent = WIKI[this.hits % WIKI.length];
+    d.style.color = BAR_COLORS[this.hits % BAR_COLORS.length];
+    log.appendChild(d);
+    while (log.children.length > 400) log.removeChild(log.firstChild);   
   },
 
   showScene: function() {
     var s = SCENES[this.scene];
     $('bg').style.background = s.img ? 'url("' + s.img + '") center / cover, ' + s.bg : s.bg;
     var t = this.over ? 'Completion through emptiness' : (WIKI.length ? WIKI[this.hits % WIKI.length] : s.title);
-    $('text').textContent = t;
+    $('chunk').textContent = t;
+    $('count').textContent = (!this.over && WIKI.length) ? (this.hits % WIKI.length + 1) + '/' + WIKI.length : '';
+    $('text').style.color = BAR_COLORS[this.hits % BAR_COLORS.length];
     $('text').style.display = t ? 'block' : 'none';
   },
 
@@ -272,7 +282,7 @@ var Pong = {
     },
 
     ai: function(dt, ball) {
-      if (ball.dx < 0) { this.dir = 0;  return; }                  // ball moving away: do nothing
+      if (ball.dx < 0) { this.dir = 0;  return; }                 
       this.predict(ball, dt);
       if (this.prediction) {
         var mid = this.top + this.height / 2;
@@ -325,7 +335,7 @@ var Pong = {
       this.frame  = 0;
     },
 
-    reset: function(playerNo) {                                    // serve from the side that just lost the point
+    reset: function(playerNo) {                                    
       this.pong.trail = [];
       this.setpos(playerNo == 1 ? this.maxX : this.minX, Math.random() * (this.maxY - this.minY) + this.minY);
       this.dx = playerNo == 1 ? -this.speed : this.speed;
@@ -333,15 +343,13 @@ var Pong = {
       this.launch();
     },
 
-    // seconds for the ball to travel `dist` along x (it speeds up by `accel`, as in accelerate())
+    // distance and acceleration
     flightTime: function(dist) {
       var v = Math.abs(this.dx), a = this.accel;
       return (Math.sqrt(v * v + 2 * a * dist) - v) / a;
     },
 
-    // Work out the next flight, once per hit: real gravity, so the ball rises and falls along a parabola.
-    // Launch speed and gravity are chosen so that it clears the net, lands on the table at bounceAt, and
-    // arrives at the other paddle at hit height. (z = height above the table, vz = vertical speed)
+    // Work out the next paddle hit
     launch: function() {
       var W = this.pong.width, n = W * LOOK.tableEnd / 2, right = this.dx > 0;     // n = x of the net
       var xb = right ? n + LOOK.bounceAt * n : n - LOOK.bounceAt * n, xr = right ? W : 0;
@@ -388,7 +396,7 @@ var Pong = {
       var hit = false, paddle = pos.dx < 0 ? player : robot;
       var pt = Pong.Helper.ballIntercept(this, paddle, pos.nx, pos.ny);
       if (pt) {
-        if (pt.d == 'left' || pt.d == 'right') { pos.x = pt.x;  pos.dx = -pos.dx;  this.pong.rally++;  hit = true;  if (paddle === player) { Pong.hits++;  Pong.showScene(); } }   // a hit
+        if (pt.d == 'left' || pt.d == 'right') { pos.x = pt.x;  pos.dx = -pos.dx;  this.pong.rally++;  hit = true;  if (paddle === player) { Pong.addLog();  Pong.hits++;  Pong.showScene(); } }   // a hit
         else                                   { pos.y = pt.y;  pos.dy = -pos.dy; }
         // add/remove spin based on paddle direction
         if (paddle.dir < 0)      pos.dy *= (pos.dy < 0 ? 0.5 : 1.5);
@@ -410,9 +418,9 @@ var Pong = {
     }
   },
 
-  //=============================================================================
+ 
   // HELPER (collision math, unchanged from the original)
-  //=============================================================================
+
 
   Helper: {
 
@@ -449,9 +457,8 @@ var Pong = {
   }
 };
 
-//=============================================================================
+
 // PAGE: canvas, input, controls, game loop
-//=============================================================================
 
 function $(id) { return document.getElementById(id); }
 
@@ -467,7 +474,8 @@ addEventListener('keyup',   function(e) { Pong.keys[e.key] = false; });
 // controls panel
 function toggle(el, show) { el.style.display = (el.style.display == 'none' || !el.style.display) ? show : 'none'; }
 $('controlsBtn').onclick = function() { toggle($('panel'), 'block'); };
-$('aboutBtn').onclick    = function() { toggle($('text'), 'block'); };
+$('hideBtn').onclick     = function() { $('panel').style.display = 'none'; };
+$('logBtn').onclick      = function() { toggle($('log'), 'flex');  $('logBtn').textContent = $('log').style.display == 'flex' ? 'Hide' : 'Show'; };
 $('scoreBtn').onclick    = function() { toggle($('score'), 'flex');  $('scoreBtn').textContent = $('score').style.display == 'none' ? 'Show' : 'Hide'; };
 $('playBtn').onclick     = function() { if (!Pong.over) Pong.pause(!Pong.paused); };
 $('resetBtn').onclick    = function() { Pong.reset(); };
